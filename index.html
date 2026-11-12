@@ -27644,7 +27644,7 @@ if (!APPS.some(a => a.id === 'steam')) {
      Gecko needs SharedArrayBuffer, and a frame inside a page that is not
      cross-origin isolated can never be granted it, so the engine runs in its
      own top-level window instead of an <iframe> inside this desktop. */
-  const FIREFOX_URL = "https://mccraekaiser48-cell.github.io/App/";
+  const FIREFOX_URL = "https://site-6c392c04d3034144bf176856dc6aaa7d.freebuff.page/firefox/";
   const FIREFOX_ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ffb300'/%3E%3Cstop offset='1' stop-color='%23ff4d00'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='32' fill='%23111016'/%3E%3Cpath d='M32 9c8 9 15 13 15 23a15 15 0 0 1-30 0c0-7 4-10 7-14 1 4 3 6 6 7-1-6 1-12 2-16z' fill='url(%23g)'/%3E%3C/svg%3E";
   const firefoxGlyph = '<img src="' + FIREFOX_ICON + '" alt="" style="width:100%;height:100%;object-fit:contain;display:block">';
 
@@ -27656,39 +27656,10 @@ if (!APPS.some(a => a.id === 'steam')) {
         '<div style="max-width:430px">' +
           '<h2 style="margin:0 0 6px;font-size:24px;font-weight:600">FireFox</h2>' +
           '<p style="margin:0 0 10px;color:#a9b3c6">Gecko compiled to WebAssembly \u2014 the whole browser, served with the COOP/COEP headers it needs.</p>' +
-          '<p style="margin:0 0 16px;color:#7d879b;font-size:12px">It opens in its own window. Keep that window open to stay signed in: the browser profile lives in memory, so closing or reloading it signs you out.</p>' +
-          '<button id="ffLaunch" type="button" style="background:#ff7139;border:0;border-radius:10px;color:#1a0d06;font:700 14px system-ui;padding:11px 22px;cursor:pointer">Open FireFox</button>' +
+          '<p style="margin:0 0 16px;color:#7d879b;font-size:12px">It opens in a new tab. Keep that tab open to stay signed in: the browser profile lives in memory, so closing or reloading it signs you out.</p>' +
+          '<a id="ffLaunch" href="' + FIREFOX_URL + '" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#ff7139;border-radius:10px;color:#1a0d06;font:700 14px system-ui;padding:11px 22px;text-decoration:none">Open FireFox &#8599;</a>' +
         '</div>' +
       '</div>';
-    const launch = () => {
-      /* The FireFox page is cross-origin isolated (COOP), which severs the
-         opener relationship: window.open("", "FireFox") can no longer find the
-         running window, so it would spawn a duplicate every time. Ask over
-         BroadcastChannel instead — that still crosses the isolation boundary. */
-      let ch = null, alive = false;
-      try { ch = new BroadcastChannel("firefox-wasm-control"); } catch (err) {}
-      if (ch) {
-        ch.onmessage = (e) => { if (e.data === "pong") alive = true; };
-        try { ch.postMessage("ping"); } catch (err) {}
-      }
-      setTimeout(() => {
-        try { ch && ch.close(); } catch (err) {}
-        if (alive) {
-          try { const f = new BroadcastChannel("firefox-wasm-control"); f.postMessage("focus"); f.close(); } catch (err) {}
-          if (typeof toast === "function") toast("FireFox is already open — its window is in the taskbar");
-          return;
-        }
-        let target = null;
-        try { target = new URL(FIREFOX_URL, location.href); } catch (err) {}
-        if (target && target.origin === location.origin && target.pathname === location.pathname) {
-          if (typeof toast === "function") toast("The Firefox tile points at Nova OS itself — the App repo needs the Firefox build, not this page");
-          return;
-        }
-        window.open(FIREFOX_URL, "FireFox", "popup=yes,width=1280,height=900");
-      }, 400);
-    };
-    rec.body.querySelector("#ffLaunch").addEventListener("click", launch);
-    launch(); /* still inside the tile click, so the popup is allowed */
   }
 
   const browserApp = APPS.find((a) => a.id === "browser");
