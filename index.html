@@ -27678,6 +27678,12 @@ if (!APPS.some(a => a.id === 'steam')) {
           if (typeof toast === "function") toast("FireFox is already open — its window is in the taskbar");
           return;
         }
+        let target = null;
+        try { target = new URL(FIREFOX_URL, location.href); } catch (err) {}
+        if (target && target.origin === location.origin && target.pathname === location.pathname) {
+          if (typeof toast === "function") toast("The Firefox tile points at Nova OS itself — the App repo needs the Firefox build, not this page");
+          return;
+        }
         window.open(FIREFOX_URL, "FireFox", "popup=yes,width=1280,height=900");
       }, 400);
     };
